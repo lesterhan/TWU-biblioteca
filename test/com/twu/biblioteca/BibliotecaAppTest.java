@@ -13,69 +13,79 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class BibliotecaAppTest {
-    private BibliotecaApp ba;
+    private BibliotecaApp app;
     private PrintStream out;
     private InputStream in;
     private BufferedReader br;
     Library library;
     @Before
     public void SetUp() throws IOException {
-        ArrayList<Book> bl = new ArrayList<Book>();
+        Map<String,Book> bookMap = new HashMap<String, Book>();
         Book b1 = mock(Book.class);
         when(b1.getDetails()).thenReturn("A Wrinkle In Time | Madeline L'engle      | 1995");
-        bl.add(b1);
+        bookMap.put("A Wrinkle In Time",b1);
         Book b2 = mock(Book.class);
         when(b2.getDetails()).thenReturn("Great Gatsby and t| F. Scott Fitzgerald   | 1953");
-        bl.add(b2);
-        library = new Library(bl);
+        bookMap.put("Great Gatsby and the Long Title",b2);
         this.out = mock(PrintStream.class);
-        this.in = mock(InputStream.class);
+        library = new Library(bookMap, out);
         this.br = mock(BufferedReader.class);
-        this.ba = new BibliotecaApp(library, out, in);
+        this.app = new BibliotecaApp(library, out, br);
     }
 
 
     @Test
     public void welcomeMessageIsProduced() {
-        ba.displayWelcome();
+        app.displayWelcome();
         verify(out).println("Welcome to Biblioteca!!!!!");
     }
 
 
     @Test
     public void showMenuOnStartup(){
-        ba.displayMenu();
+        app.displayMenu();
         verify(out).println("Menu");
         verify(out).println("1. Print Book List");
     }
 
     @Test
     public void when1IsChosenPrintList(){
-        //ba.start();
-        ba.chooseOption(1);
-        verify(out).println("Title             | Author                | Year");
-        verify(out).println("A Wrinkle In Time | Madeline L'engle      | 1995");
-        verify(out).println("Great Gatsby and t| F. Scott Fitzgerald   | 1953");
+        Library mockLib = mock(Library.class);
+        app = new BibliotecaApp(mockLib, out, br);
+        app.chooseOption(1);
+        verify(mockLib).printBookList(out);
     }
 
     @Test
     public void userInputRetrieved() throws IOException {
         when(this.br.readLine()).thenReturn("1");
-        assertThat(ba.getUserChoice(br), is(1));
+        assertThat(app.getUserInput(br), is("1"));
 
     }
 
     @Test
     public void shouldNotifyUserOnInvalidMenuOption() {
-        ba.chooseOption(2);
+        app.chooseOption(-1);
         verify(out).println("Option not valid, please choose again");
     }
     @Test
     public void shouldQuitOnQuit() {
-        ba.chooseOption(1);
-        ba.chooseOption(2);
-        ba.chooseOption(-1);
+        app.chooseOption(1);
+        app.chooseOption(0);
         verify(out).println("Goodbye!");
     }
 
+    @Test
+    public void shouldDisplaySuccessMessageUponSuccessfulCheckout() throws IOException {
+        when(br.readLine()).thenReturn("A Wrinkle In Time");
+        app.chooseOption(2);
+        verify(out).println("Thank you! Enjoy the book.");
+    }
+
+    @Test
+    public void shouldFailureMessageUponUnsuccessfulCheckout() throws IOException {
+        when(br.readLine()).thenReturn("Hitchhikers Guide to the Galaxy");
+        app.chooseOption(2);
+        verify(out).println("That book is not available");
+    }
 }
