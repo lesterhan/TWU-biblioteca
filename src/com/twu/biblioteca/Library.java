@@ -12,7 +12,7 @@ public class Library {
         this.out = out;
     }
 
-    public void printBookList(PrintStream out) {
+    public void printBookList() {
         out.println(String.format("%-18s| %-22s| %-4s", "Title", "Author", "Year"));
         for(Book b : bookMap.values()) {
             out.println(b.getDetails());

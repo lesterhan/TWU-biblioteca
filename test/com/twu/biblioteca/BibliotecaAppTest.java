@@ -16,8 +16,10 @@ public class BibliotecaAppTest {
     private BibliotecaApp app;
     private PrintStream out;
     private InputStream in;
-    private BufferedReader br;
+    private BufferedReader reader;
     Library library;
+    private Menu menu;
+
     @Before
     public void SetUp() throws IOException {
         Map<String,Book> bookMap = new HashMap<String, Book>();
@@ -29,37 +31,23 @@ public class BibliotecaAppTest {
         bookMap.put("Great Gatsby and the Long Title",b2);
         this.out = mock(PrintStream.class);
         library = new Library(bookMap, out);
-        this.br = mock(BufferedReader.class);
-        this.app = new BibliotecaApp(library, out, br);
-    }
-
-
-    @Test
-    public void welcomeMessageIsProduced() {
-        app.displayWelcome();
-        verify(out).println("Welcome to Biblioteca!!!!!");
-    }
-
-
-    @Test
-    public void showMenuOnStartup(){
-        app.displayMenu();
-        verify(out).println("Menu");
-        verify(out).println("1. Print Book List");
+        this.reader = mock(BufferedReader.class);
+        menu = new Menu(out, reader);
+        this.app = new BibliotecaApp(library, out, reader, menu);
     }
 
     @Test
     public void when1IsChosenPrintList(){
         Library mockLib = mock(Library.class);
-        app = new BibliotecaApp(mockLib, out, br);
+        app = new BibliotecaApp(mockLib, out, reader, menu);
         app.chooseOption(1);
-        verify(mockLib).printBookList(out);
+        verify(mockLib).printBookList();
     }
 
     @Test
     public void userInputRetrieved() throws IOException {
-        when(this.br.readLine()).thenReturn("1");
-        assertThat(app.getUserInput(br), is("1"));
+        when(this.reader.readLine()).thenReturn("1");
+        assertThat(app.getUserInput(reader), is("1"));
 
     }
 
@@ -77,14 +65,14 @@ public class BibliotecaAppTest {
 
     @Test
     public void shouldDisplaySuccessMessageUponSuccessfulCheckout() throws IOException {
-        when(br.readLine()).thenReturn("A Wrinkle In Time");
+        when(reader.readLine()).thenReturn("A Wrinkle In Time");
         app.chooseOption(2);
         verify(out).println("Thank you! Enjoy the book.");
     }
 
     @Test
     public void shouldFailureMessageUponUnsuccessfulCheckout() throws IOException {
-        when(br.readLine()).thenReturn("Hitchhikers Guide to the Galaxy");
+        when(reader.readLine()).thenReturn("Hitchhikers Guide to the Galaxy");
         app.chooseOption(2);
         verify(out).println("That book is not available");
     }

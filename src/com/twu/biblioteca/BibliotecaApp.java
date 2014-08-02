@@ -5,6 +5,8 @@ import java.util.*;
 public class BibliotecaApp {
 
 
+    private Menu menu;
+
     public static void main(String[] args) {
         Map<String, Book> bookMap = new HashMap<String, Book>();
         bookMap.put("A Wrinkle In Time", new Book("A Wrinkle In Time", "Madeline L'engle", 1995));
@@ -12,7 +14,8 @@ public class BibliotecaApp {
         bookMap.put("Anne of Green Gables", new Book("Anne of Green Gables", "A Lady", 1901));
         Library library = new Library(bookMap, System.out);
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        BibliotecaApp ba = new BibliotecaApp(library, System.out, reader);
+        Menu menu = new Menu(System.out, reader);
+        BibliotecaApp ba = new BibliotecaApp(library, System.out, reader, menu);
         ba.start();
 
     }
@@ -21,30 +24,20 @@ public class BibliotecaApp {
     BufferedReader reader;
     private Library library;
 
-    public BibliotecaApp(Library library, PrintStream out, BufferedReader reader) {
+    public BibliotecaApp(Library library, PrintStream out, BufferedReader reader, Menu menu) {
         this.out=out;
+        this.menu = menu;
         this.reader = reader;
         this.library = library;
     }
 
     public void start() {
-        displayWelcome();
+        menu.displayWelcome();
         boolean keepGoing = true;
         while(keepGoing) {
-            displayMenu();
+            menu.display();
             keepGoing = chooseOption(Integer.parseInt(getUserInput(reader)));
         }
-    }
-
-    public void displayMenu() {
-        out.println("Menu");
-        out.println("0. Quit");
-        out.println("1. Print Book List");
-        out.println("2. Check Out Book");
-    }
-
-    public void displayWelcome() {
-        out.println("Welcome to Biblioteca!!!!!");
     }
 
     public String getUserInput(BufferedReader reader) {
@@ -62,13 +55,20 @@ public class BibliotecaApp {
     }
 
     public boolean chooseOption(int choice) {
+        Map<Integer, Command> commandMap = new HashMap<Integer, Command>();
+
+        commandMap.put(0, new QuitAppCommand(menu));
+        commandMap.put(1, new PrintBookListCommand(library));
+        commandMap.put(2, new CheckoutBookCommand(library,menu));
+
+
         boolean keepGoing = true;
         if(choice == 0) {
-            out.println("Goodbye!");
-            keepGoing =  false;
+            menu.displayQuit();
+            keepGoing = false;
         }
         else if(choice==1){
-            library.printBookList(out);
+            library.printBookList();
         }
         else if(choice == 2) {
             attemptCheckout();

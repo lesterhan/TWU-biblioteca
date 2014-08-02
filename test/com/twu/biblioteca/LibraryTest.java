@@ -3,16 +3,13 @@ package com.twu.biblioteca;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class LibraryTest {
 
@@ -35,7 +32,7 @@ public class LibraryTest {
 
     @Test
     public void shouldPrinterHeaderRowWhenListingBooks() {
-        library.printBookList(out);
+        library.printBookList();
         verify(out).println("Title             | Author                | Year");
     }
 
@@ -43,7 +40,7 @@ public class LibraryTest {
     public void shouldPrintBookDetailsWhenThereIsOneBook() {
         bookMap.put("Book1", book1);
 
-        library.printBookList(out);
+        library.printBookList();
 
         verify(out).println("Book1 Details");
     }
@@ -53,7 +50,7 @@ public class LibraryTest {
         bookMap.put("Book1", book1);
         bookMap.put("Book2", book2);
 
-        library.printBookList(out);
+        library.printBookList();
         verify(out).println("Book2 Details");
     }
 
